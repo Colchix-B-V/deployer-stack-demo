@@ -1,0 +1,17 @@
+# The telemetry half of the stack: one Collector, one trace store.
+# Ports are bound to 127.0.0.1 so nothing is exposed to your network.
+services:
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.165.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "127.0.0.1:4318:4318" # OTLP over HTTP, where the app sends spans
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/jaeger:2.23.0
+    ports:
+      - "127.0.0.1:16686:16686" # the Jaeger UI

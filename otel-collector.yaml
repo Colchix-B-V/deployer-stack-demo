@@ -1,0 +1,27 @@
+# One pipeline in, any backend out. Swap Jaeger for Tempo, Langfuse or your
+# vendor of choice by changing the exporter, not your application.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+  # In production you would usually sample traces here, for example:
+  #   probabilistic_sampler:
+  #     sampling_percentage: 10
+  # That's fine for traces, and exactly why traces are not your audit log.
+
+exporters:
+  otlp_grpc/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp_grpc/jaeger]
